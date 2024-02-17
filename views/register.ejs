@@ -1,0 +1,21 @@
+<html>
+    <head>
+        <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    </head>
+    <body>
+        <input type="text" id="userId" />
+        <button id="createPasskey" onclick="register()">Create Passkey</button>
+        <script src="client.js"></script>
+        <script>
+            async function register() {
+                let userId = $("#userId").val();
+                try {
+                    await registerCredential(userId);
+                } catch (e) {
+                    alert(e.message);
+                    console.error(e);
+                }
+            }
+    </script>
+    </body>
+</html>
