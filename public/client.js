@@ -21,7 +21,7 @@ async function b64decode(instr){
 }
   
 // 登録を開始する
-async function registerCredential(userId) {
+async function registerCredential(userId, authenticatorAttachment, requireResidentKey, userVerification) {
     // challengeを取得する（後で使うのでサーバサイドで生成する）
     const requestUrl = '/passkey/getChallenge';
     const request = new Request(requestUrl);
@@ -46,7 +46,7 @@ async function registerCredential(userId) {
         challenge: decodedChallenge,
         rp: {
             name: "test site",
-            id: "08df-240d-1e-4ba-a800-ac83-5a06-b97f-e33c.ngrok-free.app"
+            id: window.location.hostname
         },
         user: {
             id: arrayBufferUserId,
@@ -60,41 +60,18 @@ async function registerCredential(userId) {
         ],
         excludeCredentials: [],
         authenticatorSelection: {
-            authenticatorAttachment: "platform",
-            requireResidentKey: true,
-            userVerification: "preferred"
+            authenticatorAttachment: authenticatorAttachment,
+            requireResidentKey: JSON.parse(requireResidentKey.toLowerCase()),
+            userVerification: userVerification
         }    
     };
-
+    // debug
+    console.log(options);
     // ブラウザAPIの呼び出し
     const cred = await navigator.credentials.create({
         publicKey: options,
     });
 
-    // APIレスポンスの準備
-    const credential = {};
-    credential.id = cred.id;
-    credential.rawId = cred.id;
-    credential.type = cred.type;
-    
-    if (cred.authenticatorAttachment) {
-        credential.authenticatorAttachment = cred.authenticatorAttachment;
-    }
-    
-    const clientDataJSON = await b64encode(cred.response.clientDataJSON);
-    const attestationObject = await b64encode(cred.response.attestationObject);
-    
-    const transports = cred.response.getTransports ?
-    cred.response.getTransports() : [];
-    
-    credential.response = {
-        clientDataJSON,
-        attestationObject,
-        transports
-    };
-
-    // 一旦ここまで。
-    // APIレスポンスをバックエンドに登録する処理を今後実装する    
-    console.log(credential);
+    return cred;
 };
       

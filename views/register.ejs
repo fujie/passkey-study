@@ -3,14 +3,62 @@
         <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
     </head>
     <body>
-        <input type="text" id="userId" />
-        <button id="createPasskey" onclick="register()">Create Passkey</button>
+        <h3>ユーザID</h3>
+        <div>
+            <input type="text" id="userId" />
+        </div>
+        <h3>登録オプション</h3>
+        <div>
+            <input type="radio" name="authenticatorAttachment" value="platform" checked>プラットフォーム
+            <input type="radio" name="authenticatorAttachment" value="cross-platform">クロスプラットフォーム
+        </div>
+        <div>
+            <input type="radio" name="requireResidentKey" value="true" checked>レジデントキーを要求する
+            <input type="radio" name="requireResidentKey" value="false">レジデントキーを要求しない
+        </div>
+        <div>
+            <input type="radio" name="userVerification" value="required" checked>ユーザ認証を必須とする
+            <input type="radio" name="userVerification" value="preferred">可能ならユーザ認証を要求する
+            <input type="radio" name="userVerification" value="discouraged">ユーザ認証を要求しない
+        </div>
+        <h3>登録実行</h3>
+        <div>
+            <button id="createPasskey" onclick="register()">Create Passkey</button>
+        </div>
+        <div id="api_response" hidden>
+            <h3>APIレスポンス</h3>
+            <div>
+                <li id="credentialId"></li>
+                <li id="transports"></li>
+                <li id="userPresence"></li>
+                <li id="userVerification"></li>
+                <li id="backupEligibility"></li>
+                <li id="backupState"></li>
+                <li id="attestedCredentialData"></li>
+                <li id="extensionData"></li>
+            </div>    
+        </div>
+
         <script src="client.js"></script>
         <script>
             async function register() {
+                $("#api_response").hide();
                 let userId = $("#userId").val();
+                let authenticatorAttachment = $("input[name='authenticatorAttachment']:checked").val();
+                let requireResidentKey = $("input[name='requireResidentKey']:checked").val();
+                let userVerification = $("input[name='userVerification']:checked").val();
                 try {
-                    await registerCredential(userId);
+                    const cred = await registerCredential(userId, authenticatorAttachment, requireResidentKey, userVerification);
+                    $("#credentialId").text("credentialId : " + cred.id);
+                    $("#transports").text("transports : " + cred.response.getTransports());
+                    const flags = new DataView(cred.response.getAuthenticatorData()).getUint8(32).toString();
+                    $("#userPresence").text("User Presence(UP) : "+ ((Number(flags) & 1)? 'Yes': 'No'));
+                    $("#userVerification").text("User Verification(UV) : "+ ((Number(flags) & 4)? 'Yes': 'No'));
+                    $("#backupEligibility").text("Backup Eligibility(BE) : "+ ((Number(flags) & 8)? 'Yes': 'No'));
+                    $("#backupState").text("Backup State(BS) : "+ ((Number(flags) & 16)? 'Yes': 'No'));
+                    $("#attestedCredentialData").text("Attested Credential Data(AT) : "+ ((Number(flags) & 64)? 'Yes': 'No'));
+                    $("#extensionData").text("Extension Data(ED) : "+ ((Number(flags) & 128)? 'Yes': 'No'));
+                    $("#api_response").show();
                 } catch (e) {
                     alert(e.message);
                     console.error(e);
