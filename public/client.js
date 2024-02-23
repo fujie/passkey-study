@@ -45,8 +45,20 @@ async function registerCredential(userId, authenticatorAttachment, requireReside
     const decodedChallenge = await b64decode(encodedChallenge);
 
     // ユーザIDを取得する
-    // 画面に入力された文字列をArrayBufferへ変換する
-    const arrayBufferUserId = await string_to_buffer(userId);
+    // ユーザを登録する
+    const user = {
+        username: userId
+    };
+    const userIdresponse = await _fetch(
+        '/passkey/user',
+        'POST',
+        {
+            'Content-Type': 'application/json'
+        },
+        JSON.stringify(user)
+    );
+    const encodedUserId = await userIdresponse.text();
+    const arrayBufferUserId = await b64decode(encodedUserId);
 
     // パスキー登録のためのパラメータを生成する
     const options = {
@@ -86,7 +98,7 @@ async function registerCredential(userId, authenticatorAttachment, requireReside
         {
             'Content-Type': 'application/json'
         },
-        JSON.stringify(cred)
+        JSON.stringify(cred.toJSON())
     );
 
     console.log(savedCredential);
