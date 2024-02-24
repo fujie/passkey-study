@@ -6,9 +6,14 @@ const url = require('url');
 const crypto = require('crypto');
 const jsonbin = require('../lib/jsonbin');
 
-// 初期画面のレンダリング
-router.get("/", (req, res) => {
-  res.render("./register.ejs");
+// 登録画面のレンダリング
+router.get("/register", (req, res) => {
+    res.render("./register.ejs");
+});
+
+// ログイン画面のレンダリング
+router.get("/login", (req, res) => {
+    res.render("./login.ejs");
 });
 
 // challengeを生成する

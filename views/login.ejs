@@ -1,0 +1,45 @@
+<html>
+    <head>
+        <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    </head>
+    <body>
+        <!-- <h3>ユーザID</h3>
+        <div>
+            <input type="text" id="userId" />
+        </div> -->
+        <h3>認証オプション</h3>
+        <div>
+            <input type="radio" name="userVerification" value="required" checked>ユーザ認証を必須とする
+            <input type="radio" name="userVerification" value="preferred">可能ならユーザ認証を要求する
+            <input type="radio" name="userVerification" value="discouraged">ユーザ認証を要求しない
+        </div>
+        <h3>ログイン</h3>
+        <div>
+            <button id="login" onclick="login()">Login with Passkey</button>
+        </div>
+        <div id="api_response" hidden>
+            <h3>APIレスポンス</h3>
+            <div>
+                <li id="userHandle"></li>
+                <li id="signature"></li>
+            </div>    
+        </div>
+
+        <script src="../client.js"></script>
+        <script>
+            async function login() {
+                $("#api_response").hide();
+                let userVerification = $("input[name='userVerification']:checked").val();
+                try {
+                    const cred = await loginWithPasskey(userVerification);
+                    $("#userHandle").text("userHandle : " + cred.response.userHandle);
+                    $("#signature").text("signature : " + cred.response.signature);
+                    $("#api_response").show();
+                } catch (e) {
+                    alert(e.message);
+                    console.error(e);
+                }
+            }
+    </script>
+    </body>
+</html>

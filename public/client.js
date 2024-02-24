@@ -30,6 +30,36 @@ async function _fetch(url, method, headers, body){
     });
 }
 
+// ログインする
+async function loginWithPasskey(userId, userVerification) {
+    // challengeを取得する（後で使うのでサーバサイドで生成する）
+    const challenge = await _fetch(
+        '/passkey/getChallenge',
+        'GET',
+        {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    );
+    // バイナリを扱うためにサーバ・クライアント間ではbase64urlエンコードした値でやり取りする
+    const encodedChallenge = await challenge.text();
+    const decodedChallenge = await b64decode(encodedChallenge);
+
+    // パスキーログインのためのパラメータを生成する
+    const options = {
+        challenge: decodedChallenge,
+        allowCredentials: [],
+        userVerification: userVerification
+    }
+      
+    const cred = await navigator.credentials.get({
+        publicKey: options,
+        mediation: 'optional'
+    });
+    console.log(cred.toJSON());
+
+    return cred.toJSON();
+}
+
 // 登録を開始する
 async function registerCredential(userId, authenticatorAttachment, requireResidentKey, userVerification) {
     // challengeを取得する（後で使うのでサーバサイドで生成する）
