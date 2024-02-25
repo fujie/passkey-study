@@ -57,7 +57,22 @@ async function loginWithPasskey(userId, userVerification) {
     });
     console.log(cred.toJSON());
 
-    return cred.toJSON();
+    // サーバ側へ投げ込んで検証する
+    // - challenge
+    // - origin
+    // - 署名検証
+    // 取得した認証器情報をサーバ側で保存
+    const loginResult = await _fetch(
+        '/passkey/loginWithCredential',
+        'POST',
+        {
+            'Content-Type': 'application/json'
+        },
+        JSON.stringify(cred.toJSON())
+    );
+
+    return await loginResult.json();
+
 }
 
 // 登録を開始する
@@ -120,6 +135,7 @@ async function registerCredential(userId, authenticatorAttachment, requireReside
     const cred = await navigator.credentials.create({
         publicKey: options,
     });
+    console.log("cred json: " + JSON.stringify(cred.toJSON()));
 
     // 取得した認証器情報をサーバ側で保存
     const savedCredential = await _fetch(
@@ -131,7 +147,7 @@ async function registerCredential(userId, authenticatorAttachment, requireReside
         JSON.stringify(cred.toJSON())
     );
 
-    console.log(savedCredential);
+    console.log(await savedCredential.json());
 
     return cred;
 };

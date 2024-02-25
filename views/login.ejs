@@ -20,8 +20,8 @@
         <div id="api_response" hidden>
             <h3>APIレスポンス</h3>
             <div>
-                <li id="userHandle"></li>
-                <li id="signature"></li>
+                <li id="verified"></li>
+                <li id="username"></li>
             </div>    
         </div>
 
@@ -31,9 +31,9 @@
                 $("#api_response").hide();
                 let userVerification = $("input[name='userVerification']:checked").val();
                 try {
-                    const cred = await loginWithPasskey(userVerification);
-                    $("#userHandle").text("userHandle : " + cred.response.userHandle);
-                    $("#signature").text("signature : " + cred.response.signature);
+                    const result = await loginWithPasskey(userVerification);
+                    $("#verified").text("verified : " + result.verified);
+                    $("#username").text("username : " + result.username);
                     $("#api_response").show();
                 } catch (e) {
                     alert(e.message);
